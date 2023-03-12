@@ -5,7 +5,8 @@
 // import { run5 } from "./level5";
 // import { run6 } from "./level6";
 // import { run7 } from "./level7";
-import { run8 } from "./level8";
+// import { run8 } from "./level8";
+import { run9 } from "./level9";
 
 // console.log(run1());
 // console.log(run2())
@@ -14,4 +15,4 @@ import { run8 } from "./level8";
 // console.log(run5())
 // console.log(run6())
 // console.log(run7())
-console.log(run8())
+console.log(run9())
