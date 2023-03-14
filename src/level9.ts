@@ -1,11 +1,18 @@
 import _, { last } from "lodash";
 import { readFile } from "./utils";
 
+const VISITED_MARKER = '#';
+
 enum Direction {
     U = 'U',
+    UR = 'UR',
     R = 'R',
+    DR = 'UR',
     D = 'D',
-    L = 'L'
+    DL = 'DL',
+    L = 'L',
+    UL = 'UL',
+    NONE = 'NONE'
 }
 
 interface Position {
@@ -14,7 +21,8 @@ interface Position {
 }
 
 class Map {
-    private readonly map: string[][] = [['.']];
+    private readonly EMPTY_FIELD = '.'
+    private readonly map: string[][] = [[this.EMPTY_FIELD]];
     private origin: Position = { x: 0, y:0 };
 
     private get height() {
@@ -33,7 +41,7 @@ class Map {
         switch(direction) {
             case Direction.U: {
                 for(let i = 0; i < amount; i++) {
-                    this.map.unshift('.'.repeat(this.width).split(''))
+                    this.map.unshift(this.EMPTY_FIELD.repeat(this.width).split(''))
                 }
                 this.origin.y += amount;
                 break;
@@ -41,21 +49,21 @@ class Map {
             case Direction.R: {
                 for(let i = 0; i < this.height; i++) {
                     for(let j = 0; j < amount; j++) {
-                        this.map[i].push('.');
+                        this.map[i].push(this.EMPTY_FIELD);
                     }
                 }
                 break;
             }
             case Direction.D: {
                 for(let i = 0; i < amount; i++) {
-                    this.map.push('.'.repeat(this.width).split(''))
+                    this.map.push(this.EMPTY_FIELD.repeat(this.width).split(''))
                 }
                 break;
             }
             case Direction.L: {
                 for(let i = 0; i < this.height; i++) {
                     for(let j = 0; j < amount; j++) {
-                        this.map[i].unshift('.');
+                        this.map[i].unshift(this.EMPTY_FIELD);
                     }
                 }
                 this.origin.x += amount;
@@ -108,30 +116,165 @@ class Map {
     }
 }
 
-export function run9() {
-    const input = readFile('input/level9/level9.in');
-    // const input = readFile('input/level9/example.in');
-    
-    const map = new Map();
-    map.visit({x: -1, y: -1}, '#');
-    map.visit({x: 1, y: 1}, '#');
-    map.visit({x: -5, y: 0}, '#');
-    map.visit({x: -7, y: 0}, '#');
-    map.visit({x: 6, y: 0}, '#');
-    map.visit({x: 0, y: 10}, '#');
-    map.visit({x: 1, y: 10}, '#');
-    map.visit({x: -2, y: 0}, '#');
-    map.visit({x: 1, y: 0}, '#');
-    map.visit({x: -1, y: -7}, '#');
-    map.visit({x: -10, y: -10}, '#');
-    map.visit({x: 7, y: 0}, '#');
-    map.visit({x: 0, y: 7}, '#');
-    map.visit({x: 0, y: -7}, '#');
-    map.visit({x: 10, y: 10}, '#');
-    map.visit({x: -10, y: 10}, '#');
-    map.visit({x: -10, y: -10}, '#');
-    map.visit({x: 10, y: -10}, '#');
-    map.print();
+interface Move {
+    direction: Direction;
+    amount: number;
+}
 
-    return map.findVisitedPositions('#');
+function getDirection(startPosition: Position, targetPosition: Position): Direction {
+    const diffX = targetPosition.x - startPosition.x;
+    const diffY = targetPosition.y - startPosition.y;
+
+
+    if (diffX === 0 && diffY === 0) {
+        return Direction.NONE;
+    }
+
+    if (diffX === 0) {
+        return diffY < 0 ? Direction.D : Direction.U;
+    }
+
+    if (diffY === 0) {
+        return diffX < 0 ? Direction.L : Direction.R;
+    }
+
+    if (diffX < 0) {
+        return diffY < 0 ? Direction.DL : Direction.UL;
+    } else {
+        return diffY < 0 ? Direction.DR : Direction.UR;
+    }
+}
+
+class Rope {
+    private readonly knots: Position[];
+    private readonly startPosition: Position;
+
+    constructor(length: number) {
+        this.startPosition = {x: 0, y: 0};
+        this.knots = [];
+        for(let i=0; i<length; i++) {
+            this.knots.push(_.cloneDeep(this.startPosition))
+        }
+    }
+
+    get head() {
+        return this.knots[0];
+    }
+
+    get tail() {
+        return this.knots[this.length - 1];
+    }
+
+    get length() {
+        return this.knots.length;
+    }
+
+    private moveKnot(knotIndex: number, direction: Direction) {
+        const knot = this.knots[knotIndex];
+        
+        switch(direction) {
+            case Direction.U: {
+                knot.y += 1;
+                break;
+            }
+            case Direction.UR: {
+                knot.y += 1;
+                knot.x += 1;
+                break;
+            }
+            case Direction.R: {
+                knot.x += 1;
+                break;
+            }
+            case Direction.DR: {
+                knot.x += 1;
+                knot.y -= 1;
+                break;
+            }
+            case Direction.D: {
+                knot.y -= 1;
+                break;
+            }
+            case Direction.DL: {
+                knot.y -= 1;
+                knot.x -= 1;
+                break;
+            }
+            case Direction.L: {
+                knot.x -= 1;
+                break;
+            }
+            case Direction.UL: {
+                knot.y += 1;
+                knot.x -= 1;
+                break;
+            }
+        }
+    }
+
+    moveHead(direction: Direction) {
+        this.moveKnot(0, direction);        
+
+        if (this.length <= 1) {
+            return;
+        } 
+
+        const head = this.head;
+        const second = this.knots[1];
+        const subsequentDirection = getDirection(second, head);
+        const distance = this.measureDistance(head, second);
+
+        this.moveSubsequentKnot(1, distance >= 2 ? subsequentDirection : Direction.NONE);
+    }
+
+    private moveSubsequentKnot(knotIndex: number, direction: Direction){
+        if (knotIndex === this.length) {
+            return;
+        }
+
+        if (knotIndex > this.knots.findIndex((knot) => knot.x === this.startPosition.x && knot.y === this.startPosition.y)) {
+            return;
+        }
+        
+        this.moveKnot(knotIndex, direction);
+        
+        this.moveSubsequentKnot(knotIndex + 1, direction);
+    }
+
+    private measureDistance(pos1: Position, pos2: Position) {
+        const diffX = pos1.x - pos2.x;
+        const diffY = pos1.y - pos2.y;
+    
+        return Math.sqrt(diffX * diffX + diffY * diffY);
+    }
+}
+
+function run(moves: Move[], map: Map) {
+    const rope = new Rope(6);
+
+    moves.forEach((move) => {
+        for(let i=0; i<move.amount; i++) {
+            rope.moveHead(move.direction)
+            map.visit(rope.head, 'h');
+            map.visit(rope.tail, VISITED_MARKER);
+        }
+    })
+}
+
+export function run9() {
+    // const input = readFile('input/level9/level9.in');
+    const input = readFile('input/level9/example.in');
+    
+    const moves = input.map((line): Move => {
+        const moveMeta = line.split(" ");
+        return {direction: moveMeta[0] as Direction, amount: parseInt(moveMeta[1])}
+    })
+
+    const map = new Map();
+    map.print();
+    
+    run(moves, map);
+    map.print();
+    
+    return map.findVisitedPositions(VISITED_MARKER);
 }
