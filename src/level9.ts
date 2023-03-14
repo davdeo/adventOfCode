@@ -7,7 +7,7 @@ enum Direction {
     U = 'U',
     UR = 'UR',
     R = 'R',
-    DR = 'UR',
+    DR = 'DR',
     D = 'D',
     DL = 'DL',
     L = 'L',
@@ -71,7 +71,7 @@ class Map {
             }
         }
     }
-
+    
     private setMapPosition(position: Position, value: string) {
         let mappedPosition = this.getMappedPosition(position);
         if (mappedPosition.y >= this.height) {
@@ -79,7 +79,7 @@ class Map {
         } else if (mappedPosition.y < 0) {
             this.expandMap(Direction.U, Math.abs(this.origin.y - position.y));
         } 
-
+        
         mappedPosition = this.getMappedPosition(position);        
         if (mappedPosition.x < 0) {
             this.expandMap(Direction.L, - this.origin.x - position.x);
@@ -109,6 +109,12 @@ class Map {
             process.stdout.write(`|\n`);
         })
         process.stdout.write(`x${'-'.repeat(this.width * 2 + 1)}x\n`)
+    }
+
+    clear() {
+        this.map.forEach((row, rowIndex) => row.forEach((position, colIndex) => {
+            this.map[rowIndex][colIndex] = this.EMPTY_FIELD;
+        }));
     }
 
     findVisitedPositions(marker: string) {
@@ -169,7 +175,7 @@ class Rope {
         return this.knots.length;
     }
 
-    private moveKnot(knotIndex: number, direction: Direction) {
+    private moveKnot(knotIndex: number, direction: Direction, map: Map) {
         const knot = this.knots[knotIndex];
         
         switch(direction) {
@@ -212,8 +218,8 @@ class Rope {
         }
     }
 
-    moveHead(direction: Direction) {
-        this.moveKnot(0, direction);        
+    moveHead(direction: Direction, map:Map) {
+        this.moveKnot(0, direction, map);        
 
         if (this.length <= 1) {
             return;
@@ -224,21 +230,29 @@ class Rope {
         const subsequentDirection = getDirection(second, head);
         const distance = this.measureDistance(head, second);
 
-        this.moveSubsequentKnot(1, distance >= 2 ? subsequentDirection : Direction.NONE);
+        console.log("T Dir", subsequentDirection)
+
+        this.moveSubsequentKnot(1, distance >= 2 ? subsequentDirection : Direction.NONE, map);
+        map.visit(this.head, 'H');
     }
 
-    private moveSubsequentKnot(knotIndex: number, direction: Direction){
+    private moveSubsequentKnot(knotIndex: number, direction: Direction, map: Map){
         if (knotIndex === this.length) {
             return;
         }
+        
 
-        if (knotIndex > this.knots.findIndex((knot) => knot.x === this.startPosition.x && knot.y === this.startPosition.y)) {
+        if (_.isEqual(this.knots[knotIndex], this.startPosition)) {
+            this.moveKnot(knotIndex, direction, map);
+            map.visit(this.knots[knotIndex], '#');
+            
             return;
         }
+
+        this.moveKnot(knotIndex, direction, map);
+        map.visit(this.knots[knotIndex], '#');
         
-        this.moveKnot(knotIndex, direction);
-        
-        this.moveSubsequentKnot(knotIndex + 1, direction);
+        this.moveSubsequentKnot(knotIndex + 1, direction, map);
     }
 
     private measureDistance(pos1: Position, pos2: Position) {
@@ -254,9 +268,14 @@ function run(moves: Move[], map: Map) {
 
     moves.forEach((move) => {
         for(let i=0; i<move.amount; i++) {
-            rope.moveHead(move.direction)
-            map.visit(rope.head, 'h');
-            map.visit(rope.tail, VISITED_MARKER);
+            console.log("move rope");
+            console.log("H Dir", move.direction)
+            rope.moveHead(move.direction, map);
+            map.print();
+            map.clear();
+
+            // map.visit(rope.head, 'h');
+            // map.visit(rope.tail, VISITED_MARKER);
         }
     })
 }
