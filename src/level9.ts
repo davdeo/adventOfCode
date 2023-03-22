@@ -263,6 +263,7 @@ class Rope {
             return;
         }
 
+
         this.moveKnot(knotIndex, direction, map);
         // map.visit(this.knots[knotIndex], '#');
 
