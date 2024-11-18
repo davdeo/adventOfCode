@@ -3,4 +3,5 @@ import * as path from 'path';
 
 export function writeFile(filePath: string, data: string): void {
     const file = fs.writeFileSync(path.join(__dirname, '../', filePath), data, { flag: 'w' });
+    console.log("File written successfully with:", data);
 }
