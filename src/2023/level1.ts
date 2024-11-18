@@ -11,7 +11,7 @@ export function runlevel1() {
 
     const input = readFile('2023/input/level1/level1.in');
     const result = calculateResult(input);
-    writeFile('2023/output/level1/level1.out', `${result}`)
+    writeFile('2023/output/level1.out', `${result}`)
 }
 
 
