@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { readFile } from "./utils";
+import { readFile } from "../utils";
 
 function convertLetterToPriority(letter: string): number {
     const charCode = letter.charCodeAt(0);

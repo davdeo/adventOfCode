@@ -1,6 +1,6 @@
 import _ from "lodash";
-import { addHex, divideHex, multiplyHex, readFile, moduloHex } from "./utils";
-import { writeFile } from "./utils";
+import { addHex, divideHex, multiplyHex, readFile, moduloHex } from "../utils";
+import { writeFile } from "../utils";
 
 class Monkey {
     public items: string[];

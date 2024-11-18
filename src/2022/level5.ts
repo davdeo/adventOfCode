@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { readFile } from "./utils";
+import { readFile } from "../utils";
 
 interface Move {
     iterations: number, from: number, to: number

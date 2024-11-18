@@ -1,6 +1,6 @@
 import _ from "lodash";
-import { readFile } from "./utils";
-import { writeFile } from "./utils";
+import { readFile } from "../utils";
+import { writeFile } from "../utils";
 
 enum OperationType {
     ADD_X = 'addx',

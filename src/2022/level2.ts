@@ -1,4 +1,4 @@
-import { readFile } from "./utils";
+import { readFile } from "../utils";
 
 enum Opponent {
     ROCK = 'A',

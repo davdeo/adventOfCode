@@ -1,5 +1,5 @@
 import _, { last } from "lodash";
-import { readFile } from "./utils";
+import { readFile } from "../utils";
 
 type TreeMap = number[][];
 
@@ -18,10 +18,10 @@ function isVisible(map: TreeMap, row: number, col: number) {
     const treeInQuestion = map[row][col];
     const width = map[0].length;
     const height = map.length;
-    
+
     // console.log('width', width);
     // console.log('width', height);
-    
+
     if (row === 0 || row === height - 1 || col === 0 || col === width -1) {
         return true;
     }
@@ -40,10 +40,10 @@ function getVisibilityScore(map: TreeMap, row: number, col: number) {
     const treeInQuestion = map[row][col];
     const width = map[0].length;
     const height = map.length;
-    
+
     // console.log('width', width);
     // console.log('width', height);
-    
+
     if (row === 0 || row === height - 1 || col === 0 || col === width -1) {
         return 0;
     }
@@ -52,22 +52,22 @@ function getVisibilityScore(map: TreeMap, row: number, col: number) {
 
     // Top
     let visibilityScoreTop = map.slice(0, row).reverse().findIndex((aRow) => aRow[col] >= treeInQuestion);
-    visibilityScoreTop = visibilityScoreTop === -1 ? row : visibilityScoreTop + 1 
+    visibilityScoreTop = visibilityScoreTop === -1 ? row : visibilityScoreTop + 1
     // console.log('top: ', visibilityScoreTop);
 
     // Right
     let visibilityScoreRight = map[row].slice(col + 1).findIndex((tree) => tree >= treeInQuestion);
-    visibilityScoreRight = visibilityScoreRight === -1 ? width - col - 1 : visibilityScoreRight + 1 
+    visibilityScoreRight = visibilityScoreRight === -1 ? width - col - 1 : visibilityScoreRight + 1
     // console.log('right: ', visibilityScoreRight);
-    
+
     // Bottom
     let visibilityScoreBottom = map.slice(row + 1).findIndex((aRow) => aRow[col] >= treeInQuestion);
-    visibilityScoreBottom = visibilityScoreBottom === -1 ? height - row - 1 : visibilityScoreBottom + 1 
+    visibilityScoreBottom = visibilityScoreBottom === -1 ? height - row - 1 : visibilityScoreBottom + 1
     // console.log('bottom: ', visibilityScoreBottom);
 
     // Left
     let visibilityScoreLeft = map[row].slice(0, col).reverse().findIndex((tree) => tree >= treeInQuestion);
-    visibilityScoreLeft = visibilityScoreLeft === -1 ? col : visibilityScoreLeft + 1 
+    visibilityScoreLeft = visibilityScoreLeft === -1 ? col : visibilityScoreLeft + 1
     // console.log('left: ', visibilityScoreLeft);
 
     return visibilityScoreTop * visibilityScoreRight * visibilityScoreBottom * visibilityScoreLeft;
@@ -76,7 +76,7 @@ function getVisibilityScore(map: TreeMap, row: number, col: number) {
 export function run8() {
     const input = readFile('input/level8/level8.in');
     // const input = readFile('input/level8/example.in');
-    
+
     const treeMap = generateTreeMap(input);
 
     // console.log(treeMap);

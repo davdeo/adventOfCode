@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { readFile } from "./utils";
+import { readFile } from "../utils";
 
 export function run41() {
     // const input = readFile('input/level4/level4.in');

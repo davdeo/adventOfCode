@@ -1,4 +1,4 @@
-import { readFile } from "./utils";
+import { readFile } from "../utils";
 
 export function run1() {
     const input = readFile('input/level1/level1.in');

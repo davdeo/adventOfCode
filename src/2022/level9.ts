@@ -1,7 +1,7 @@
 import { dir } from "console";
 import _, { last } from "lodash";
-import { readFile } from "./utils";
-import { writeFile } from "./utils/write";
+import { readFile } from "../utils";
+import { writeFile } from "../utils/write";
 
 const VISITED_MARKER = '#';
 

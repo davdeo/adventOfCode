@@ -1,12 +1,12 @@
 import _, { last } from "lodash";
-import { readFile } from "./utils";
+import { readFile } from "../utils";
 
 class Node {
     children: Node[];
     parent: Node | null;
     name: string;
     size: number;
-    
+
     readonly TAB_WIDTH = 3;
 
     constructor(name: string, size?: number, children?: Node[]) {
@@ -43,7 +43,7 @@ class Node {
         if (this.size !== 0) {
             return `- ${this.name} (file, size=${this.size}) [parent: ${this.parent?.name ?? 'null'}]`;
         }
-        
+
         return `- ${this.name} (dir) [parent: ${this.parent?.name ?? 'null'}]`;
     }
 
@@ -107,7 +107,7 @@ function testNodes() {
 
 function buildNodesFromLog(log: string[]): Node {
     const root = new Node("/");
-    
+
     let index = 0;
     let lastCommand: {id: string, to?: string} = {id: ''};
     let currentNode: Node = root;
@@ -134,12 +134,12 @@ function buildNodesFromLog(log: string[]): Node {
                 if (!currentNode.hasDirectChild(lineMeta[1]))
                     currentNode.addChild(new Node(lineMeta[1]));
             } else {
-                if (!currentNode.hasDirectChild(lineMeta[1])) 
+                if (!currentNode.hasDirectChild(lineMeta[1]))
                     currentNode.addChild(new Node(lineMeta[1], parseInt(lineMeta[0])))
             }
-        } 
+        }
         // Command = cd
-        else if (lastCommand.id === 'cd') {   
+        else if (lastCommand.id === 'cd') {
             if (lineMeta[2] === '..') {
                 currentNode = currentNode.parent ?? currentNode;
             } else if (lineMeta[2] === '/') {
@@ -149,18 +149,18 @@ function buildNodesFromLog(log: string[]): Node {
                 currentNode = nextNode ?? currentNode;
             }
         }
-    
+
         index ++;
     }
-    
-    
+
+
     return root;
 }
 
 export function run7() {
     const input = readFile('input/level7/level7.in');
     // const input = readFile('input/level7/example.in');
-    
+
     const tree = buildNodesFromLog(input);
     // const tree = testNodes();
     // tree.printTree();
@@ -169,7 +169,7 @@ export function run7() {
 
     // console.log(tree.accumulatedSize);
     // console.log(possibleDirs.map((node) => node.accumulatedSize).reduce((acc, curr) => acc + curr, 0));
-    
+
     const TOTAL_SPACE =  70000000;
     const NEEDED_SPACE = 30000000;
     const usedSpace = tree.accumulatedSize;
@@ -185,6 +185,6 @@ export function run7() {
 
     const chosenDirs = flatTree.filter((size) => freeSpace + size >= NEEDED_SPACE).sort((a, b) => a - b);
     // console.log(chosenDirs)
-    
+
     return chosenDirs[0];
 }
