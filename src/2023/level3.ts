@@ -1,4 +1,4 @@
-import _ from "lodash";
+import _, {isNil} from "lodash";
 import {Input, readFile, writeFile} from "../utils";
 
 export function runlevel3() {
@@ -6,12 +6,12 @@ export function runlevel3() {
     console.log("Run level3");
 
     const exampleInput = readFile('2023/input/level3/example.in');
-    const exampleResult = calculateResult1(exampleInput);
+    const exampleResult = calculateResult2(exampleInput);
     console.log("exampleOutput:", exampleResult);
 
-    // const input = readFile('2023/input/level3/level3.in');
-    // const result = calculateResult1(input);
-    // writeFile('2023/output/level3.out', `${result}`)
+    const input = readFile('2023/input/level3/level3.in');
+    const result = calculateResult2(input);
+    writeFile('2023/output/level3.out', `${result}`)
 }
 
 interface PartCoordinates {
@@ -21,56 +21,109 @@ interface PartCoordinates {
 
 function calculateResult1(input: Input) {
     const {lines} = input;
-    let res = 0;
     const partCoordinates: PartCoordinates[] = [];
     const schematic: string[][] = [];
-    
+
     for (let y = 0; y < lines.length; y++) {
         const line = lines[y];
-        
-        console.log(line);
-        
+
         // Find parts
         const matches = line.matchAll(/[^a-zA-Z0-9\s\.]/g);
         for (const m of matches) {
             const x = m.index;
             partCoordinates.push({y, x})
         }
-        
+
         // Build schematic
         const schematicLine = line.split("");
         schematic.push(schematicLine);
     }
 
+    const partNumbers = [];
+
     for (const part of partCoordinates) {
-        console.log();
-        console.log("found part: ", part, schematic[part.y][part.y])
-        findAttatchedNumbers(schematic, part);
+        partNumbers.push(...findAttatchedNumbers(schematic, part));
     }
+
+    const res = partNumbers.reduce((prev, curr) => {
+        return prev + curr;
+    }, 0)
 
     return res;
 }
 
 function findAttatchedNumbers(schematic: string[][], position: PartCoordinates) {
-    for(let i = position.y - 1; i <= position.y + 1; i++) {
-        for (let j = position.x - 1; j <= position.x + 1; j ++) {
-            if (_.isEqual(position, {y: i, x: j})
-            || i < 0 || i >= schematic.length
-            || j < 0 || j >= schematic[0]?.length || 0
+    const partNumbers = [];
+
+    for(let y = position.y - 1; y <= position.y + 1; y++) {
+        for (let x = position.x - 1; x <= position.x + 1; x ++) {
+            if (_.isEqual(position, {y: y, x: x})
+            || y < 0 || y >= schematic.length
+            || x < 0 || x >= schematic[0]?.length || 0
         ) {
                 continue;
             }
 
-            if (schematic[i][j]) {}
+            const match = schematic[y][x].match(/\d/);
+            if (!isNil(match)) {
+                const numArr = [schematic[y][x]];
+                let xLeft = x - 1;
+                let xRight = x + 1;
 
-            console.log({y: i, x:j}, schematic[i][j]);
+                while(xLeft >= 0 && schematic[y][xLeft].match(/\d/)) {
+                    numArr.unshift(schematic[y][xLeft]);
+                    schematic[y][xLeft] = "X";
+                    xLeft--;
+                }
+                while(xRight < schematic[0].length && schematic[y][xRight].match(/\d/)) {
+                    numArr.push(schematic[y][xRight]);
+                    schematic[y][xRight] = "X";
+                    xRight++;
+                }
+
+                const partNumber = parseInt(numArr.reduce((prev, curr) => {
+                    return prev + curr;
+                }, ""))
+                partNumbers.push(partNumber);
+            }
         }
     }
+
+    return partNumbers;
 }
 
 function calculateResult2(input: Input) {
     const {lines} = input;
-    let res = 0;
+    const partCoordinates: PartCoordinates[] = [];
+    const schematic: string[][] = [];
+
+    for (let y = 0; y < lines.length; y++) {
+        const line = lines[y];
+
+        // Find parts
+        const matches = line.matchAll(/\*/g);
+        for (const m of matches) {
+            const x = m.index;
+            partCoordinates.push({y, x})
+        }
+
+        // Build schematic
+        const schematicLine = line.split("");
+        schematic.push(schematicLine);
+    }
+
+    const partNumbers = [];
+
+    for (const part of partCoordinates) {
+        const partNumbersLocal = findAttatchedNumbers(schematic, part);
+        if (partNumbersLocal.length === 2) {
+            partNumbers.push(partNumbersLocal[0] * partNumbersLocal[1]);
+        }
+    }
+
+    const res = partNumbers.reduce((prev, curr) => {
+        return prev + curr;
+    }, 0)
 
     return res;
 }
