@@ -1,3 +1,4 @@
+import _ from "lodash";
 import {Input, readFile, writeFile} from "../utils";
 
 export function runlevel3() {
@@ -42,13 +43,30 @@ function calculateResult1(input: Input) {
     }
 
     for (const part of partCoordinates) {
-        console.log(part, schematic[part.y][part.y])
+        console.log();
+        console.log("found part: ", part, schematic[part.y][part.y])
+        findAttatchedNumbers(schematic, part);
     }
 
     return res;
 }
 
-function findAdjacentNumber(schematic: string[][], currentPos: PartCoordinates, numberPositions: PartCoordinates[]) {}
+function findAttatchedNumbers(schematic: string[][], position: PartCoordinates) {
+    for(let i = position.y - 1; i <= position.y + 1; i++) {
+        for (let j = position.x - 1; j <= position.x + 1; j ++) {
+            if (_.isEqual(position, {y: i, x: j})
+            || i < 0 || i >= schematic.length
+            || j < 0 || j >= schematic[0]?.length || 0
+        ) {
+                continue;
+            }
+
+            if (schematic[i][j]) {}
+
+            console.log({y: i, x:j}, schematic[i][j]);
+        }
+    }
+}
 
 function calculateResult2(input: Input) {
     const {lines} = input;
