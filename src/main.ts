@@ -3,9 +3,11 @@ import {runlevel2} from "./2023/level2";
 import { runlevel3 } from "./2023/level3";
 import {runlevel24} from "./2023/level24";
 import {runlevel4} from "./2023/level4";
+import {runlevel5} from "./2023/level5";
 
 // runlevel1();
 // runlevel2();
 // runlevel3();
-runlevel4();
+// runlevel4();
+runlevel5();
 // runlevel24();

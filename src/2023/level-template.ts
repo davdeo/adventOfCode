@@ -8,7 +8,7 @@ export function runlevelx() {
     const exampleResult = calculateResult1(exampleInput);
     console.log("exampleOutput:", exampleResult);
 
-    // const input = readFile('2023/input/levelx/levelx.in');
+    // const input = readFile('2023/input/levelx/real.in');
     // const result = calculateResult1(input);
     // writeFile('2023/output/levelx.out', `${result}`)
 }
